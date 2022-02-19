@@ -331,14 +331,14 @@ if __name__ == '__main__':
     parser.add_argument(
         '--how_many_training_epochs',
         type=int,
-        default=2,
+        default=61,
         help='How many epochs.'
     
     )
     parser.add_argument(
         '--how_many_training_steps',
         type=int,
-        default=1000,
+        default=850,
         help='How many steps.'
     
     )
