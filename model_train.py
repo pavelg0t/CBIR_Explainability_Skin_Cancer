@@ -271,8 +271,9 @@ def main(_):
             plt.show()
 
             run_date = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") 
-            os.mkdir(f'{run_date}')
-            plt.savefig(f'imgs/{run_date}/t-SNE.png')
+            img_folder = f'imgs/{run_date}'
+            os.makedirs(img_folder)
+            plt.savefig(os.path.join(img_folder,'t-SNE.png'))
 
             sess.close()
 
