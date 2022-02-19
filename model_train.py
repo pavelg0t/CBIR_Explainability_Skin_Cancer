@@ -278,7 +278,7 @@ def main(_):
 
             img_folder = f'imgs/intermediate'
             os.makedirs(img_folder)
-            plt.savefig(os.path.join(img_folder,'t-SNE-{run_date}.png'))
+            plt.savefig(os.path.join(img_folder,f't-SNE-{run_date}.png'))
 
             sess.close()
 
