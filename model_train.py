@@ -262,18 +262,23 @@ def main(_):
             tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
             tsne_results = tsne.fit_transform(feat)
 
+            # save intermediate t-SNE results
+            run_date = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") 
+            results_folder = f'results/intermediate'
+            os.makedirs(results_folder)
+            np.save( os.path.join(results_folder,f't-SNE-{run_date}'), tsne_results)
+
             plt.close()
             fig, ax = plt.subplots(figsize=(16, 10))
-            scatter = ax.scatter(tsne_results[:, 0], tsne_results[:, 1], c=true_label, cmap='Accent')
+            scatter = ax.scatter(tsne_results[:, 0], tsne_results[:, 1], s=50, c=true_label, cmap='Accent')
             ax.legend(*scatter.legend_elements(), title='Classes')
             #ax.set_xlim([-12, 12])
             #ax.set_ylim([-12, 12])
             plt.show()
 
-            run_date = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") 
-            img_folder = f'imgs/{run_date}'
+            img_folder = f'imgs/intermediate'
             os.makedirs(img_folder)
-            plt.savefig(os.path.join(img_folder,'t-SNE.png'))
+            plt.savefig(os.path.join(img_folder,'t-SNE-{run_date}.png'))
 
             sess.close()
 
