@@ -1,0 +1,9 @@
+# venv folder
+env
+
+# data related files
+data/*.zip
+data/*.tfrecords
+
+# model related files
+model/*
