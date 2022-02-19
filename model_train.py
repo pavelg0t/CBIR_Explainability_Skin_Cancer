@@ -18,6 +18,7 @@ import math
 import sklearn.metrics as metrics
 from cvxopt import matrix, spdiag, solvers
 from tqdm import tqdm
+from datetime import datetime
 
 import csv
 
@@ -267,6 +268,7 @@ def main(_):
             #ax.set_xlim([-12, 12])
             #ax.set_ylim([-12, 12])
             plt.show()
+            plt.savefig(f'imgs/{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}/t-SNE.png')
 
             sess.close()
 
