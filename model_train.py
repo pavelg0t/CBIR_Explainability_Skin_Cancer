@@ -11,6 +11,7 @@ from __future__ import print_function
 
 import argparse
 import os.path
+import string
 import sys
 import numpy as np
 import math
@@ -330,8 +331,15 @@ if __name__ == '__main__':
     parser.add_argument(
         '--how_many_training_epochs',
         type=int,
-        default=61,
+        default=2,
         help='How many epochs.'
+    
+    )
+    parser.add_argument(
+        '--how_many_training_steps',
+        type=int,
+        default=1000,
+        help='How many steps.'
     
     )
     parser.add_argument(
@@ -378,8 +386,10 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--triplet',
-        type=bool,
-        default=False,
+        # type=bool,
+        type=str,
+        # default='False',
+        default='triplet_semi',
         help='Whether to use triplet loss to regularize the model.'
     )
     parser.add_argument(
@@ -399,6 +409,12 @@ if __name__ == '__main__':
         type=int,
         default=256,
         help='Size (number of units) of the second head.'
+    )
+    parser.add_argument(
+        '--image_size',
+        type=int,
+        default=299,
+        help='Size of the lession image (square image).'
     )
     Flags, unparsed = parser.parse_known_args()
     tf.app.run(main=main)

@@ -7,3 +7,8 @@ data/*.tfrecords
 
 # model related files
 model/*
+
+# pycache
+_pycache_
+_pycache_/*
+preprocessing/__pycache__/*

@@ -16,7 +16,8 @@ import numpy as np
 import csv
 
 from sklearn.feature_extraction.text import CountVectorizer
-from preprocessing import inception_preprocessing
+# from preprocessing import inception_preprocessing
+
 
 
 
@@ -108,11 +109,15 @@ def read_and_decode(dataset, batch_size, is_training, data_size):
     return dataset
 
 def transform_data(img, is_training, dim):
-    image_dense = tf.map_fn(
-        lambda x: inception_preprocessing.preprocess_image(x, dim, dim, is_training=is_training,
-                                                           add_image_summaries=False, fast_mode=False), img,
-        dtype=tf.float32)
+    print('*'*100)
+    print('TO DO: Use inception preprocessing compatible with Tensorflow v2.8')
+    print('*'*100)
+    # image_dense = tf.map_fn(
+    #     lambda x: inception_preprocessing.preprocess_image(x, dim, dim, is_training=is_training,
+    #                                                        add_image_summaries=False, fast_mode=False), img,
+    #     dtype=tf.float32)
 
-    image_dense = tf.to_float(tf.image.convert_image_dtype(image_dense, tf.uint8))
+    # image_dense = tf.to_float(tf.image.convert_image_dtype(image_dense, tf.uint8))
+    image_dense = tf.to_float(tf.image.convert_image_dtype(img, tf.uint8))
 
     return image_dense

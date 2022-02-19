@@ -113,7 +113,7 @@ def apply_model(train_size, data, captions, n_classes, wordtoix,
 
     data = tf.cond(is_training, lambda: self_aug(data), lambda: data)
 
-    CNN = apply_network_img(network)
+    CNN = apply_network_img(network, image_size)
 
     CNN.summary()
     
