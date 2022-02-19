@@ -11,6 +11,7 @@ from __future__ import print_function
 
 import argparse
 import os.path
+import os
 import string
 import sys
 import numpy as np
@@ -268,7 +269,10 @@ def main(_):
             #ax.set_xlim([-12, 12])
             #ax.set_ylim([-12, 12])
             plt.show()
-            plt.savefig(f'imgs/{datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}/t-SNE.png')
+
+            run_date = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") 
+            os.mkdir(f'{run_date}')
+            plt.savefig(f'imgs/{run_date}/t-SNE.png')
 
             sess.close()
 
