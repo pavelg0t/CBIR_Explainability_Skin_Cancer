@@ -84,12 +84,8 @@ def apply_model(train_size, data, captions, n_classes, wordtoix,
                              triplet,LAMBDA,
                              two_headed,two_head_size,is_training):
 
-    print('before: ',type(data))
-
-    data = tf.cond(is_training, lambda: da.transform_data(data, True, dim=image_size), 
-                                lambda: da.transform_data(data, False, dim=image_size))
-    print('after: ',type(data))
-
+    # data = tf.cond(is_training, lambda: da.transform_data(data, True, dim=image_size), 
+    #                             lambda: da.transform_data(data, False, dim=image_size))
 
     batch_size = tf.shape(data)[0]
 
