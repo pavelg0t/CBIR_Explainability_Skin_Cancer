@@ -20,6 +20,7 @@ import sklearn.metrics as metrics
 from cvxopt import matrix, spdiag, solvers
 from tqdm import tqdm
 from datetime import datetime
+import wandb
 
 import csv
 
@@ -63,6 +64,9 @@ def main(_):
     maxlen = np.max([x for x in map(lambda x: len(x.decode().split(' ')), anno)])
 
     weights_vector = counts
+
+    # integration with WandB
+    wandb.init(project=Flags.wandb_project_name)
 
     with g_1.as_default():
         sess = tf.Session(graph=g_1)
@@ -270,6 +274,12 @@ def main(_):
                         metrics.balanced_accuracy_score(true_label_val, error),
                         metrics.accuracy_score(true_label_val, error)))
 
+                wandb.log(
+                    {
+                        'balanced_accuracy': metrics.balanced_accuracy_score(true_label_val, error),
+                        'accuracy': metrics.accuracy_score(true_label_val, error),
+                    })
+
 
                 tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=3000)
                 tsne_results = tsne.fit_transform(feat)
@@ -434,6 +444,12 @@ if __name__ == '__main__':
         type=int,
         default=299,
         help='Size of the lession image (square image).'
+    )
+    parser.add_argument(
+        '--wandb_project_name',
+        type=str,
+        default=f'project_{datetime.now().strftime("%Y-%m-%d-%H-%M")}',
+        help='WandB project name.'
     )
     Flags, unparsed = parser.parse_known_args()
     tf.app.run(main=main)
