@@ -192,6 +192,13 @@ def main(_):
                                 k, how_many_training_steps - 1, steps,
                                 (Flags.train_dataset_size // Flags.train_batch_size), score))
 
+                                wandb.log(
+                                    {
+                                        'epoch': k,
+                                        'steps': steps,
+                                        'batch_loss': score,
+                                    })
+
                                 steps += 1
 
                     except tf.errors.OutOfRangeError:
@@ -201,6 +208,13 @@ def main(_):
                 print('Finished Training. BACC %f and Accuracy %f' % (
                 metrics.balanced_accuracy_score(true_label, error),
                 metrics.accuracy_score(true_label, error)))
+
+                wandb.log(
+                    {
+                        'epoch': k,
+                        'train_balanced_accuracy': metrics.balanced_accuracy_score(true_label, error),
+                        'train_accuracy': metrics.accuracy_score(true_label, error),
+                    })
 
                 summary = tf.Summary(
                 value=[tf.Summary.Value(tag='losses/Class_Loss', simple_value=np.mean(scores))])
@@ -276,8 +290,9 @@ def main(_):
 
                 wandb.log(
                     {
-                        'balanced_accuracy': metrics.balanced_accuracy_score(true_label_val, error),
-                        'accuracy': metrics.accuracy_score(true_label_val, error),
+                        'epoch': k,
+                        'val_balanced_accuracy': metrics.balanced_accuracy_score(true_label_val, error),
+                        'val_accuracy': metrics.accuracy_score(true_label_val, error),
                     })
 
 
@@ -448,7 +463,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--wandb_project_name',
         type=str,
-        default=f'project_{datetime.now().strftime("%Y-%m-%d-%H-%M")}',
+        default=f'CBIR_{datetime.now().strftime("%Y-%m-%d-%H-%M")}',
         help='WandB project name.'
     )
     Flags, unparsed = parser.parse_known_args()
