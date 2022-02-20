@@ -86,7 +86,7 @@ def apply_model(train_size, data, captions, n_classes, wordtoix,
 
     # data = tf.cond(is_training, lambda: da.transform_data(data, True, dim=image_size), 
     #                             lambda: da.transform_data(data, False, dim=image_size))
-    # data = tf.to_float(tf.image.convert_image_dtype(data, tf.uint8))
+    data = tf.to_float(data)
     print('data : ', data)
     print('data Type: ', data.dtype)
 
