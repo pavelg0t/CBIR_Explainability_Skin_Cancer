@@ -271,7 +271,7 @@ def main(_):
                             metrics.accuracy_score(true_label_val, error)))
 
 
-                    tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
+                    tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=3000)
                     tsne_results = tsne.fit_transform(feat)
 
                     # save intermediate t-SNE results
