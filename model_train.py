@@ -148,144 +148,144 @@ def main(_):
                 os.makedirs(img_folder)
 
             for k in range(0, Flags.how_many_training_epochs):
-                    print('-------------------------------------------------------')
-                    sess.run(train_iterator)
-                    steps = 0
+                print('-------------------------------------------------------')
+                sess.run(train_iterator)
+                steps = 0
 
-                    scores = np.array([])
-                    scores_cont = np.array([])
-                    scores_simi = np.array([])
-                    scores_distil = np.array([])
+                scores = np.array([])
+                scores_cont = np.array([])
+                scores_simi = np.array([])
+                scores_distil = np.array([])
 
-                    error = np.array([])
-                    true_label = np.array([])
+                error = np.array([])
+                true_label = np.array([])
 
-                    feat = np.empty([0, int(centers.shape[1])])
+                feat = np.empty([0, int(centers.shape[1])])
 
-                    with slim.queues.QueueRunners(sess):
+                with slim.queues.QueueRunners(sess):
+                    try:
+                        with tqdm(total=np.sum(counts)) as pbar:
+                            while True:
+                                _, final_loss, gt, err, score, features, score_cont, score_simi, score_distil = sess.run(
+                                                                                        [train_op, total_loss, true, pred, class_loss, centers, cont_loss, sim_loss, 
+                                                                                        distil_loss],feed_dict={is_training: True, K.backend.learning_phase(): 1})
+
+                                scores = np.append(scores, score)
+                                scores_cont = np.append(scores_cont, score_cont)
+                                scores_simi = np.append(scores_simi, score_simi)
+                                scores_distil = np.append(scores_distil, score_distil)
+
+                                error = np.append(error, err)
+
+                                true_label = np.append(true_label, gt)
+
+                                feat = np.concatenate([feat, features], axis=0)
+
+
+                                pbar.update(Flags.train_batch_size)
+
+                                print('Epoch %s /%s Step %s /%s: Batch_loss is %f' % (
+                                k, how_many_training_steps - 1, steps,
+                                (Flags.train_dataset_size // Flags.train_batch_size), score))
+
+                                steps += 1
+
+                    except tf.errors.OutOfRangeError:
+                        saver.save(sess, Flags.train_dir_log + '/model', global_step=k)
+                        pass
+                
+                print('Finished Training. BACC %f and Accuracy %f' % (
+                metrics.balanced_accuracy_score(true_label, error),
+                metrics.accuracy_score(true_label, error)))
+
+                summary = tf.Summary(
+                value=[tf.Summary.Value(tag='losses/Class_Loss', simple_value=np.mean(scores))])
+
+                train_writer.add_summary(summary, k)
+
+                summary = tf.Summary(
+                    value=[tf.Summary.Value(tag='losses/Cont_Loss', simple_value=np.mean(scores_cont))])
+
+                train_writer.add_summary(summary, k)
+
+                summary = tf.Summary(
+                    value=[tf.Summary.Value(tag='losses/Simi_Loss', simple_value=np.mean(scores_simi))])
+
+                train_writer.add_summary(summary, k)
+
+                summary = tf.Summary(
+                    value=[tf.Summary.Value(tag='losses/Distil_Loss', simple_value=np.mean(scores_distil))])
+
+                train_writer.add_summary(summary, k)
+
+                summary = tf.Summary(value=[tf.Summary.Value(tag='BACC/Train_BACC',
+                                                            simple_value=metrics.balanced_accuracy_score(
+                                                                true_label, error))])
+
+                train_writer.add_summary(summary, k)
+
+                summary = tf.Summary(value=[tf.Summary.Value(tag='Accuracy/Train_ACC',
+                                                            simple_value=metrics.accuracy_score(true_label,
+                                                                                                error))])
+                train_writer.add_summary(summary, k)
+
+
+                sess.run(val_iterator)
+
+                scores = np.array([])
+                error = np.array([])
+                true_label_val = np.array([])
+
+                with slim.queues.QueueRunners(sess):
                         try:
-                            with tqdm(total=np.sum(counts)) as pbar:
-                                while True:
-                                    _, final_loss, gt, err, score, features, score_cont, score_simi, score_distil = sess.run(
-                                                                                            [train_op, total_loss, true, pred, class_loss, centers, cont_loss, sim_loss, 
-                                                                                            distil_loss],feed_dict={is_training: True, K.backend.learning_phase(): 1})
+                            while True:
+                                val_loss,gt,err = sess.run([class_loss,true, pred],feed_dict={is_training: False,K.backend.learning_phase(): 0})
+                                
+                                scores = np.append(scores, val_loss)
 
-                                    scores = np.append(scores, score)
-                                    scores_cont = np.append(scores_cont, score_cont)
-                                    scores_simi = np.append(scores_simi, score_simi)
-                                    scores_distil = np.append(scores_distil, score_distil)
+                                error = np.append(error, err)
 
-                                    error = np.append(error, err)
-
-                                    true_label = np.append(true_label, gt)
-
-                                    feat = np.concatenate([feat, features], axis=0)
-
-
-                                    pbar.update(Flags.train_batch_size)
-
-                                    print('Epoch %s /%s Step %s /%s: Batch_loss is %f' % (
-                                    k, how_many_training_steps - 1, steps,
-                                    (Flags.train_dataset_size // Flags.train_batch_size), score))
-
-                                    steps += 1
-
+                                true_label_val = np.append(true_label_val, gt)
                         except tf.errors.OutOfRangeError:
-                            saver.save(sess, Flags.train_dir_log + '/model', global_step=k)
                             pass
-                    
-                    print('Finished Training. BACC %f and Accuracy %f' % (
-                    metrics.balanced_accuracy_score(true_label, error),
-                    metrics.accuracy_score(true_label, error)))
+                
+                summary = tf.Summary(
+                value=[tf.Summary.Value(tag='losses/Val_Loss', simple_value=np.mean(scores))])
 
-                    summary = tf.Summary(
-                    value=[tf.Summary.Value(tag='losses/Class_Loss', simple_value=np.mean(scores))])
+                validation_writer.add_summary(summary, k)
 
-                    train_writer.add_summary(summary, k)
+                summary = tf.Summary(value=[tf.Summary.Value(tag='BACC/Val_BACC',
+                                                            simple_value=metrics.balanced_accuracy_score(
+                                                                true_label_val, error))])
 
-                    summary = tf.Summary(
-                        value=[tf.Summary.Value(tag='losses/Cont_Loss', simple_value=np.mean(scores_cont))])
+                validation_writer.add_summary(summary, k)
 
-                    train_writer.add_summary(summary, k)
+                summary = tf.Summary(value=[tf.Summary.Value(tag='Accuracy/Val_ACC',
+                                                            simple_value=metrics.accuracy_score(true_label_val,
+                                                                                                error))])
 
-                    summary = tf.Summary(
-                        value=[tf.Summary.Value(tag='losses/Simi_Loss', simple_value=np.mean(scores_simi))])
+                validation_writer.add_summary(summary, k)
 
-                    train_writer.add_summary(summary, k)
-
-                    summary = tf.Summary(
-                        value=[tf.Summary.Value(tag='losses/Distil_Loss', simple_value=np.mean(scores_distil))])
-
-                    train_writer.add_summary(summary, k)
-
-                    summary = tf.Summary(value=[tf.Summary.Value(tag='BACC/Train_BACC',
-                                                                simple_value=metrics.balanced_accuracy_score(
-                                                                    true_label, error))])
-
-                    train_writer.add_summary(summary, k)
-
-                    summary = tf.Summary(value=[tf.Summary.Value(tag='Accuracy/Train_ACC',
-                                                                simple_value=metrics.accuracy_score(true_label,
-                                                                                                    error))])
-                    train_writer.add_summary(summary, k)
+                print('Finished validation. BACC %f and Accuracy %f' % (
+                        metrics.balanced_accuracy_score(true_label_val, error),
+                        metrics.accuracy_score(true_label_val, error)))
 
 
-                    sess.run(val_iterator)
+                tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=3000)
+                tsne_results = tsne.fit_transform(feat)
 
-                    scores = np.array([])
-                    error = np.array([])
-                    true_label_val = np.array([])
+                # save intermediate t-SNE results
+                np.save( os.path.join(results_folder,f't-SNE-{k}_epch'), tsne_results)
+                np.save( os.path.join(results_folder,f'gt-{k}_epch'), true_label)
 
-                    with slim.queues.QueueRunners(sess):
-                            try:
-                                while True:
-                                    val_loss,gt,err = sess.run([class_loss,true, pred],feed_dict={is_training: False,K.backend.learning_phase(): 0})
-                                    
-                                    scores = np.append(scores, val_loss)
-
-                                    error = np.append(error, err)
-
-                                    true_label_val = np.append(true_label_val, gt)
-                            except tf.errors.OutOfRangeError:
-                                pass
-                    
-                    summary = tf.Summary(
-                    value=[tf.Summary.Value(tag='losses/Val_Loss', simple_value=np.mean(scores))])
-
-                    validation_writer.add_summary(summary, k)
-
-                    summary = tf.Summary(value=[tf.Summary.Value(tag='BACC/Val_BACC',
-                                                             simple_value=metrics.balanced_accuracy_score(
-                                                                 true_label_val, error))])
-
-                    validation_writer.add_summary(summary, k)
-
-                    summary = tf.Summary(value=[tf.Summary.Value(tag='Accuracy/Val_ACC',
-                                                             simple_value=metrics.accuracy_score(true_label_val,
-                                                                                                 error))])
-
-                    validation_writer.add_summary(summary, k)
-
-                    print('Finished validation. BACC %f and Accuracy %f' % (
-                            metrics.balanced_accuracy_score(true_label_val, error),
-                            metrics.accuracy_score(true_label_val, error)))
-
-
-                    tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=3000)
-                    tsne_results = tsne.fit_transform(feat)
-
-                    # save intermediate t-SNE results
-                    np.save( os.path.join(results_folder,f't-SNE-{k}_epch'), tsne_results)
-                    np.save( os.path.join(results_folder,f'gt-{k}_epch'), true_label)
-
-                    plt.close()
-                    fig, ax = plt.subplots(figsize=(16, 10))
-                    scatter = ax.scatter(tsne_results[:, 0], tsne_results[:, 1], s=50, c=true_label, cmap='Accent')
-                    ax.legend(*scatter.legend_elements(), title='Classes')
-                    #ax.set_xlim([-12, 12])
-                    #ax.set_ylim([-12, 12])
-                    plt.show()
-                    plt.savefig(os.path.join(img_folder,f't-SNE-{k}_epch.png'))
+                plt.close()
+                fig, ax = plt.subplots(figsize=(16, 10))
+                scatter = ax.scatter(tsne_results[:, 0], tsne_results[:, 1], s=50, c=true_label, cmap='Accent')
+                ax.legend(*scatter.legend_elements(), title='Classes')
+                #ax.set_xlim([-12, 12])
+                #ax.set_ylim([-12, 12])
+                plt.show()
+                plt.savefig(os.path.join(img_folder,f't-SNE-{k}_epch.png'))
 
             sess.close()
 
