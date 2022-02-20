@@ -463,7 +463,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--wandb_project_name',
         type=str,
-        default=f'CBIR_{datetime.now().strftime("%Y-%m-%d-%H-%M")}',
+        default=f'Skin_Cancer_Diagnosis_Using_CBIR',
         help='WandB project name.'
     )
     Flags, unparsed = parser.parse_known_args()
