@@ -108,8 +108,10 @@ def main(_):
 
         global_step = tf.Variable(0, trainable=False)
 
-        boundaries = [int(0.5 * Flags.how_many_training_steps * (np.sum(counts) / Flags.train_batch_size)),
-                        int(0.75 * Flags.how_many_training_steps * (np.sum(counts) / Flags.train_batch_size))]
+        how_many_training_steps = Flags.how_many_training_epochs*math.ceil(Flags.train_dataset_size/Flags.train_batch_size)
+
+        boundaries = [int(0.5 * how_many_training_steps * (np.sum(counts) / Flags.train_batch_size)),
+                        int(0.75 * how_many_training_steps * (np.sum(counts) / Flags.train_batch_size))]
 
         lr_init = [0.00001, 0.000001, 0.0000001]
 
@@ -121,7 +123,7 @@ def main(_):
 
         cnn_model.save_weights(Flags.train_dir_log + '/init')
 
-        saver = tf.train.Saver(max_to_keep=Flags.how_many_training_steps)
+        saver = tf.train.Saver(max_to_keep=how_many_training_steps)
 
         with sess.as_default():
 
@@ -183,7 +185,7 @@ def main(_):
                                     pbar.update(Flags.train_batch_size)
 
                                     print('Epoch %s /%s Step %s /%s: Batch_loss is %f' % (
-                                    k, Flags.how_many_training_steps - 1, steps,
+                                    k, how_many_training_steps - 1, steps,
                                     (Flags.train_dataset_size // Flags.train_batch_size), score))
 
                                     steps += 1
@@ -352,13 +354,13 @@ if __name__ == '__main__':
         help='How many epochs.'
     
     )
-    parser.add_argument(
-        '--how_many_training_steps',
-        type=int,
-        default=850,
-        help='How many steps.'
+    # parser.add_argument(
+    #     '--how_many_training_steps',
+    #     type=int,
+    #     default=850,
+    #     help='How many steps.'
     
-    )
+    # )
     parser.add_argument(
         '--network',
         type=str,
