@@ -135,6 +135,16 @@ def main(_):
 
             validation_writer = tf.summary.FileWriter(Flags.val_dir, sess.graph)
 
+            run_date = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+            results_folder = f'results/intermediate/{run_date}'
+            if not os.path.exists(results_folder):
+                os.makedirs(results_folder)
+
+            img_folder = f'imgs/intermediate/{run_date}'
+            if not os.path.exists(img_folder):
+                os.makedirs(img_folder)
+
             for k in range(0, Flags.how_many_training_epochs):
                     print('-------------------------------------------------------')
                     sess.run(train_iterator)
@@ -259,26 +269,21 @@ def main(_):
                             metrics.accuracy_score(true_label_val, error)))
 
 
-            tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
-            tsne_results = tsne.fit_transform(feat)
+                    tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=300)
+                    tsne_results = tsne.fit_transform(feat)
 
-            # save intermediate t-SNE results
-            run_date = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") 
-            results_folder = f'results/intermediate'
-            os.makedirs(results_folder)
-            np.save( os.path.join(results_folder,f't-SNE-{run_date}'), tsne_results)
+                    # save intermediate t-SNE results
+                    np.save( os.path.join(results_folder,f't-SNE-{k}_epch'), tsne_results)
+                    np.save( os.path.join(results_folder,f'gt-{k}_epch'), true_label)
 
-            plt.close()
-            fig, ax = plt.subplots(figsize=(16, 10))
-            scatter = ax.scatter(tsne_results[:, 0], tsne_results[:, 1], s=50, c=true_label, cmap='Accent')
-            ax.legend(*scatter.legend_elements(), title='Classes')
-            #ax.set_xlim([-12, 12])
-            #ax.set_ylim([-12, 12])
-            plt.show()
-
-            img_folder = f'imgs/intermediate'
-            os.makedirs(img_folder)
-            plt.savefig(os.path.join(img_folder,f't-SNE-{run_date}.png'))
+                    plt.close()
+                    fig, ax = plt.subplots(figsize=(16, 10))
+                    scatter = ax.scatter(tsne_results[:, 0], tsne_results[:, 1], s=50, c=true_label, cmap='Accent')
+                    ax.legend(*scatter.legend_elements(), title='Classes')
+                    #ax.set_xlim([-12, 12])
+                    #ax.set_ylim([-12, 12])
+                    plt.show()
+                    plt.savefig(os.path.join(img_folder,f't-SNE-{k}_epch.png'))
 
             sess.close()
 

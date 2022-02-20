@@ -87,8 +87,6 @@ def apply_model(train_size, data, captions, n_classes, wordtoix,
     # data = tf.cond(is_training, lambda: da.transform_data(data, True, dim=image_size), 
     #                             lambda: da.transform_data(data, False, dim=image_size))
     data = tf.to_float(data)
-    print('data : ', data)
-    print('data Type: ', data.dtype)
 
 
     batch_size = tf.shape(data)[0]
