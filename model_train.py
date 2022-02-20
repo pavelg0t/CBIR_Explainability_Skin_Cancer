@@ -151,6 +151,8 @@ def main(_):
             if not os.path.exists(img_folder):
                 os.makedirs(img_folder)
 
+            steps_old = 0
+
             for k in range(0, Flags.how_many_training_epochs):
                 print('-------------------------------------------------------')
                 sess.run(train_iterator)
@@ -195,7 +197,7 @@ def main(_):
                                 wandb.log(
                                     {
                                         'epoch': k,
-                                        'steps': steps,
+                                        'steps': steps + steps_old,
                                         'batch_loss': score,
                                     })
 
@@ -311,6 +313,8 @@ def main(_):
                 #ax.set_ylim([-12, 12])
                 plt.show()
                 plt.savefig(os.path.join(img_folder,f't-SNE-{k}_epch.png'))
+
+                steps_old += steps
 
             sess.close()
 
